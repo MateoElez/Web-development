@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Flower power!</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="images/flower-icon.png" rel="shortcut icon" type="image/png"/>
+    <link href="vendor/normalize.css" rel="stylesheet" type="text/css">
+    <link href="styles/main.css" rel="stylesheet" type="text/css">
+    <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+</head>
+
+
+<body class="content body-header-fixed">
+    <header class="header header-fixed primary-color-bg">
+        <nav class="navigation container">
+            <div class="menu">
+                <a class="link menu-item" href="index.html">Home</a>
+                <a class="link menu-item" href="order.html">Order</a>
+                <a class="link" href="index.html">
+                    <img alt="Company logo" class="scaled-image scaled-image-fixed" src="images/logo.svg">
+                </a>
+                <a class="link menu-item" href="#">Contact us</a>
+                <a class="link menu-item cart-menu link-active" href="cart.html">
+                    <img alt="Cart icon" src="images/cart-icon.svg">
+                    <div class="cart-menu-status">
+                        <div id="cart-items">0</div>
+                        <div>items</div>
+                    </div>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <main class="main">
+        <div class="centered-container">
+            <h1 class="decorated-title font-secondary main-color"><span class="main-color-emphasized">
+                            Shopping cart</span> items</h1>
+            <div class="separator"></div>
+        </div>
+        <div class="cart"></div>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <div class="menu menu-distributed">
+                <div class="infobox infobox-marginless infobox-copyright">
+                    <h4 class="infobox-title infobox-title-secondary-color main-color-emphasized">
+                        Copy this as much as you like
+                    </h4>
+                </div>
+                <div class="infobox infobox-marginless infobox-flower">
+                    <h4 class="infobox-title infobox-title-secondary-color main-color-emphasized">
+                        Flower power
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <template id= "cart-template-header">
+        <div class= "cart-header">
+            <div class= "cart-header-title"> Product </div>
+            <div class= "cart-header-title"> Price </div>
+            <div class= "cart-header-title"> Quantity </div>
+        </div>
+    </template>
+    <template id= "cart-template-item">
+        <div class= "cart-item">
+            <div class= "cart-item-title"></div>
+            <div class= "cart-item-price"></div>
+            <input type= "number" min="0" step="1" class= "cart-item-quantity">
+            <input type= "button" class= "cart-btn-x-remove-item-btn" value= "x">
+        </div>
+    </template>
+    <template id= "cart-total-template">
+        <div class= "cart-total">
+             <div> Total: </div>
+            <div id= "cart-total-value"></div>
+        </div>
+    </template>
+    <template id= "cart-template-footer">
+        <input type= "button" style= "float: right" class= "cart-btn-x-remove-all-btn" onclick= "emptyCart()"
+        value= "Empty cart">
+    </template>
+
+    <script>
+
+        let getProduct = async function(productId, quantity) {
+            let response = await fetch("https://web1lab2.azurewebsites.net/products/" + productId);
+            let data = await response.json();
+            addCartItem(data, quantity);
+        };
+
+        let addCartItem = async function(product, quantity) {
+            console.log(quantity);
+            let cartElement = document.querySelector('.cart');
+            let cartElementTemplate = document.querySelector('#cart-template-item');
+
+            let productElement = cartElementTemplate.content.cloneNode(true);
+
+            let productElementTitle = productElement.querySelector('.cart-item-title');
+            productElementTitle.textContent = product.name;
+
+            let productElementPrice = productElement.querySelector('.cart-item-price');
+            productElementPrice.dataset.price = product.price;
+            productElementPrice.textContent = product.price + " kn";
+
+            let productQuantityElement = productElement.querySelector('.cart-item-quantity');
+            productQuantityElement.value = quantity;
+            productQuantityElement.dataset.productId = product.id;
+            productQuantityElement.onchange = function() {
+                let kolicina = Number(onchange.target.value);
+                //let id = change.target.dataset.productId;
+                localStorage.setItem(product.id, JSON.stringify(JSON.parse(kolicina)));
+                updateTotal();
+            }
+
+            let productDeleteButton = productElement.querySelector('.cart-btn-x-remove-item-btn');
+
+            console.log(quantity);
+            
+            productDeleteButton.dataset.productId = product.id;
+            productDeleteButton.onclick = function() {
+                localStorage.setItem('totalAmount', JSON.stringify(JSON.parse(localStorage.getItem('totalAmount') - (quantity))));
+
+                localStorage.removeItem(product.id);
+                productQuantityElement.value = 0;   
+                updateTotal();
+            }
+
+            cartElement.appendChild(productElement);
+        }
+
+        let updateTotal = function() {
+            let cartTotalValue = document.querySelector('#cart-total-value');
+            let totalPrice = 0;
+
+            let cartItemsTemplate = document.querySelectorAll('.cart-item');
+
+            cartItemsTemplate.forEach(function(cartItem) {
+
+                let elementPrice = cartItem.querySelector('.cart-item-price');
+                let price = Number(elementPrice.dataset.price);
+                console.log("price: " + price);
+
+                let elementQuantity = (cartItem.querySelector('.cart-item-quantity'));
+                let quantity = Number(elementQuantity.value);
+                console.log("quantity: " + quantity);
+
+
+                totalPrice += price * quantity;
+                //if(localStorage.getItem(price) != null)
+                    //totalPrice += Number(localStorage.getItem(price));
+            });
+            if(cartTotalValue.textContent != null  && totalPrice != null) 
+                cartTotalValue.textContent = totalPrice;
+        }
+
+        let getCartItems = async function() {
+
+            console.log("ispisuj nesto boati")
+            let cartElement = document.querySelector('.cart');
+            let cartTemplateHeader = document.querySelector('#cart-template-header');
+            let cartTemplateFooter = document.querySelector('#cart-template-footer');
+
+            let headerElement = cartTemplateHeader.content.cloneNode(true);
+            let footerElement = cartTemplateFooter.content.cloneNode(true);
+
+            cartElement.appendChild(headerElement);
+
+            for (i = 0;i < 8 ; i++) {
+
+                console.log("localStorage: " + localStorage.getItem(i));
+                //let product = JSON.parse(localStorage.getItem(i + 1));
+                await getProduct(i + 1, localStorage.getItem(i + 1));
+            }
+
+            let cartTotalTemplate = document.querySelector('#cart-total-template');
+            let totalElement = cartTotalTemplate.content.cloneNode(true);
+
+            let emptyCartButton = footerElement.querySelector('.cart-btn-x-remove-all-btn');
+        
+            cartElement.appendChild(totalElement);
+            cartElement.appendChild(footerElement);
+
+            
+            //na kraju update napravi uvik...
+            updateTotal();
+            
+        }
+
+        let emptyCart = function() {
+            //localStorage.setItem('totalAmount', 0);
+            for(let i in localStorage){
+                if(localStorage.getItem(i + 1) != null)
+                localStorage.removeItem(i + 1);
+            }
+            let cart = document.querySelector('.cart');
+            cart.textContent = "";
+            updateTotal();
+        }
+        //localStorage.clear();
+        getCartItems();
+        
+    </script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>

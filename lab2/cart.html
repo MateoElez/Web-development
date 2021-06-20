@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Flower power!</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="images/flower-icon.png" rel="shortcut icon" type="image/png"/>
+    <link href="vendor/normalize.css" rel="stylesheet" type="text/css">
+    <link href="styles/main.css" rel="stylesheet" type="text/css">
+    <meta content="text/html; charset=utf-8" http-equiv="content-type"/>
+</head>
+
+
+<body class="content body-header-fixed">
+    <header class="header header-fixed primary-color-bg">
+        <nav class="navigation container">
+            <div class="menu">
+                <a class="link menu-item" href="index.html">Home</a>
+                <a class="link menu-item" href="order.html">Order</a>
+                <a class="link" href="index.html">
+                    <img alt="Company logo" class="scaled-image scaled-image-fixed" src="images/logo.svg">
+                </a>
+                <a class="link menu-item" href="#">Contact us</a>
+                <a class="link menu-item cart-menu link-active" href="cart.html">
+                    <img alt="Cart icon" src="images/cart-icon.svg">
+                    <div class="cart-menu-status">
+                        <div id="cart-items">0</div>
+                        <div>items</div>
+                    </div>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <main class="main">
+        <div class="centered-container">
+            <h1 class="decorated-title font-secondary main-color"><span class="main-color-emphasized">Shopping
+                    cart</span> items</h1>
+            <div class="separator"></div>
+            Filter products<br></br>
+            <input type="text" class="cart-filter-text", value=""></input>
+            <button class="cart-filter-apply" onclick="applyFunction()">Apply</button>
+            <button class="cart-filter-clear" onclick="clearFunction()">Clear</button>
+            <div class="separator"></div>
+        </div>
+        <div class="container centered-container cart"></div>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <div class="menu menu-distributed">
+                <div class="infobox infobox-marginless infobox-copyright">
+                    <h4 class="infobox-title infobox-title-secondary-color main-color-emphasized">
+                        Copy this as much as you like
+                    </h4>
+                </div>
+                <div class="infobox infobox-marginless infobox-flower">
+                    <h4 class="infobox-title infobox-title-secondary-color main-color-emphasized">
+                        Flower power
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <template id="cart-template-header">
+        <div class="cart-header">
+            <div class="cart-header-title">Product</div>
+            <div class="cart-header-title">Price</div>
+            <div class="cart-header-title">Quantity</div>
+        </div>
+    </template>
+    <template id="cart-template-item">
+        <div class="cart-item">
+            <div class="cart-item-title">Tulips</div>
+            <div class="cart-item-price">15 kn</div>
+            <input type="number" class="cart-item-quantity"></input>
+        </div>
+    </template>
+
+    <script>
+
+        let getProduct = async function(productId, quantity) {
+            let response = await fetch("https://web1lab2.azurewebsites.net/products/" + productId);
+            let data = await response.json();
+
+            if(quantity != 0)
+                addCartItem(data, quantity);
+        };
+        
+        //omogucit filtiranje po imenu, cijeni i kolicini
+        let applyFunction = function() {
+            let cartFilterApply = document.querySelector('.cart-filter-apply');
+            let cartFilterText = document.querySelector('.cart-filter-text');
+
+            //kod filtriranja -> case insensitive
+            let filterBy = cartFilterText.value.toLowerCase();
+
+            //prolazi kroz sve elemente kosarice i gledaj jeli sadrzi substirng taj filterBy
+            //gledas ime, a zatim cijenu i kolicinu
+            let cart = document.querySelectorAll('.cart-item');
+
+            for(item of cart){
+                console.log(item);
+                let cartItemTitle = item.querySelector('.cart-item-title');
+                let cartItemPrice = item.querySelector('.cart-item-price');
+                let cartItemQuantity = item.querySelector('.cart-item-quantity');
+
+                let itemTitle = cartItemTitle.textContent;
+                let itemPrice = cartItemPrice.textContent;
+                let itemQuantity = cartItemQuantity.value;
+
+                if(!itemTitle.toLowerCase().includes(filterBy) && 
+                !itemPrice.includes(filterBy) &&
+                !itemQuantity.includes(filterBy)){
+                    item.style.display = "none";
+                }
+            }
+        }
+
+        let clearFunction = function() {
+            let cartFilterClear = document.querySelector('.cart-filter-clear');
+
+            //gumbon "Clear" omoguci da se pojave svi artikli i da se ocisti search bar
+
+            //prvo cistimo search bar
+            let cartFilterText = document.querySelector('.cart-filter-text');
+            cartFilterText.value = "";
+
+            //zatim omogucimo ponovni prikaz svih proizvoda
+            let cart = document.querySelectorAll('.cart-item');
+            for(item of cart) {
+                item.style.display = "flex";
+            }
+        }
+
+        let addCartItem = async function(product, quantity) {
+            //console.log(quantity);
+            let cartElement = document.querySelector('.cart');
+            let cartElementTemplate = document.querySelector('#cart-template-item');
+
+            let productElement = cartElementTemplate.content.cloneNode(true);
+
+            let productElementTitle = productElement.querySelector('.cart-item-title');
+            productElementTitle.textContent = product.name;
+
+            let productElementPrice = productElement.querySelector('.cart-item-price');
+            productElementPrice.dataset.price = product.price;
+            productElementPrice.textContent = product.price + " kn";
+
+            let productQuantityElement = productElement.querySelector('.cart-item-quantity');
+            productQuantityElement.value = quantity;
+            productQuantityElement.dataset.productId = product.id;
+            
+            cartElement.appendChild(productElement);
+        }
+
+
+    let getCartItems = async function() {
+
+        //console.log("ispisuj nesto")
+        let cartElement = document.querySelector('.cart');
+        let cartTemplateHeader = document.querySelector('#cart-template-header');
+        //let cartTemplateFooter = document.querySelector('#cart-template-footer');
+
+        let headerElement = cartTemplateHeader.content.cloneNode(true);
+        //let footerElement = cartTemplateFooter.content.cloneNode(true);
+
+        cartElement.appendChild(headerElement);
+
+        for (i = 0;i < 8 ; i++) {
+            if(localStorage.getItem(i + 1) != null)
+                await getProduct(i + 1, localStorage.getItem(i + 1));
+        }
+    }
+
+    getCartItems();
+
+    </script>
+    <script src="scripts/main.js"></script>
+
+</body>
+</html>
