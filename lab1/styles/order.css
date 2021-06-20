@@ -1,0 +1,86 @@
+@import url("main.css");
+
+  .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      margin-bottom: 1em;
+
+  }
+  .box{
+    text-align: center;
+    justify-content: center;
+  }
+
+  .font{
+        font-size: 30px;
+  }
+
+  .photo-box {
+        width: 200px;
+        height: 200px;
+        background-repeat: no repeat;
+        background-position: center;
+        background-size: cover;
+        margin: auto;
+        justify-content: space-around;
+  }
+
+  .firts-photo-grid .first-photo {
+      background-image: url("../images/tulip.jpg");
+      
+  }
+  .firts-photo-grid .second-photo {
+      background-image: url("../images/lavender.jpg");
+  }
+
+  .firts-photo-grid .third-photo {
+      background-image: url("../images/fuchsia.jpg");
+    }
+
+  .second-photo-grid .first-photo {
+      background-image: url("../images/rake.jpg");
+    }
+
+  .second-photo-grid .second-photo {
+      background-image: url("../images/shovel.jpg");
+  }
+
+  .section{
+    box-sizing: border-box;    
+  }
+  .pagination {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    justify-content: space-around;
+    display: inline-block;
+    padding: 0px;
+  }
+  .pagination-ul{
+    list-style-type: none;
+    margin: 0;
+  }
+  .pagination-li{
+    border: 3px solid #e0aacd;
+    border-radius: 4px; 
+    display: inline-block;
+    margin: 0;
+    padding: 12px;
+    margin-right: -4px;
+    border-right: 0;
+  }
+
+  .hard-cod {
+    color: #e0aacd;
+    text-decoration: underline;
+  }
+
+  #previous{ 
+    min-width: 75px;
+    max-width: 75px;
+  }
+  #next{
+    min-width: 75px;
+    max-width: 75px;
+    border-right:3px solid #e0aacd;
+  }
